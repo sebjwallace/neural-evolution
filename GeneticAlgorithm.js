@@ -17,7 +17,7 @@ GeneticAlgorithm.prototype.populate = function(constructor){
 GeneticAlgorithm.prototype.train = function(iterations,test){
   for(var i = 0; i < iterations; i++){
     var scores = []
-    for(var n = 0; n < this.networks.length; n++)
+    for(var n = 0; n < this.size; n++)
       scores.push({
         score: test(this.networks[n]),
         network: this.networks[n]
@@ -29,11 +29,13 @@ GeneticAlgorithm.prototype.train = function(iterations,test){
 GeneticAlgorithm.prototype.repopulate = function(scores){
   this.networks = this.select(scores)
   for(var i = 0; i < this.size / 2; i++){
-    var a = this.networks[random(0,this.networks.length-1)]
-    var b = this.networks[random(0,this.networks.length-1)]
-    var c = this.networks[random(1,this.networks.length-1)]
-    c.crossover(a,b)
-    c.mutate(random(10,100))
+    var mother = this.networks[random(0,this.networks.length-1)]
+    var father = this.networks[random(0,this.networks.length-1)]
+    var child = this.networks[random(1,this.networks.length-1)]
+    child.crossover(mother,father)
+    child.mutate(random(10,100))
+    for(var n = 0; n < (probable(0.1) ? random(1,10) : 0); n++)
+      child.mutate(100)
   }
 }
 

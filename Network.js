@@ -9,7 +9,7 @@ function Network(i,o){
 
   for(var i = 0; i < this.ports; i++)
     this.neurons[i] = {
-      activation: i >= this.inputs ? 'identity' : 'rectifier',
+      activation: 'sigmoid',
       threshold: 1
     }
 
@@ -46,9 +46,9 @@ Network.prototype.clone = function(){
 }
 
 Network.prototype.mutate = function(rate){
-  if(probable(rate/1000)){
+  if(probable(rate/100)){
     this.weights.addRowCol()
-    this.neurons.push({threshold: 1, activation: 'rectifier'})
+    this.neurons.push({threshold: 1, activation: 'sigmoid'})
   }
   if(probable(rate/1000) && this.weights.length > this.ports){
     this.weights.removeRowCol()
@@ -56,8 +56,11 @@ Network.prototype.mutate = function(rate){
   }
   this.weights.iterate(function(i,y,x){
     if(probable(rate))
-      this.weights.set(y,x,i + (randomFloat() / ((101 - rate)/10)))
+      this.weights.set(y,x,i + randomFloat())
   }.bind(this))
+  for(var i = 0; i < this.neurons.length; i++)
+    if(probable(rate))
+      this.neurons[i].activation = probable(50) ? 'sigmoid' : 'binary'
 }
 
 Network.prototype.crossover = function(a,b){

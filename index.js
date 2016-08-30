@@ -2,17 +2,35 @@
 
 
 var ga = new GeneticAlgorithm(100,function(){
-  return new Network(2,1)
+  var net = new Network(3,1)
+  net.mutate(100)
+  return net
 })
 
 ga.train(1000,function(net){
 
-  var result = net.process([2,5])[0]
+  var score = 0
 
-  return result
+  score += net.process([1,0,0])[0].toFixed(3) == 0 ? 1 : 0
+  score += net.process([1,0,1])[0].toFixed(3) == 1 ? 1 : 0
+  score += net.process([1,1,0])[0].toFixed(3) == 1 ? 1 : 0
+  score += net.process([1,1,1])[0].toFixed(3) == 0 ? 1 : 0
+
+  return score
 
 })
 
 var net = ga.master
 console.log(net.weights.toString())
-console.log(net.process([2,4]))
+
+console.log('1 1 : 0')
+console.log(net.process([1,1,1])[0])
+
+console.log('1 0 : 1')
+console.log(net.process([1,1,0])[0])
+
+console.log('0 1 : 1')
+console.log(net.process([1,0,1])[0])
+
+console.log('0 0 : 0')
+console.log(net.process([1,0,0])[0])
