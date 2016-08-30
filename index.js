@@ -1,18 +1,18 @@
 
 
-var net = new Network(2,1)
 
-var ga = new MatrixGA(3,100)
+var ga = new GeneticAlgorithm(100,function(){
+  return new Network(2,1)
+})
 
-ga.train(100,function(matrix){
+ga.train(1000,function(net){
 
-  net.weights = matrix
-  var result = net.process([2,5])
+  var result = net.process([2,5])[0]
 
   return result
 
 })
 
-net.weights = ga.master
+var net = ga.master
 console.log(net.weights.toString())
 console.log(net.process([2,4]))

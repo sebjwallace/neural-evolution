@@ -17,8 +17,6 @@ function Network(i,o){
 
 Network.prototype.process = function(inputs){
 
-  var self = this
-
   var matrix = new Matrix(this.weights.root())
   for(var i = 0; i < this.inputs; i++)
     matrix.fillRow(i,inputs[i])
@@ -27,8 +25,8 @@ Network.prototype.process = function(inputs){
   while(!matrix.get(this.ports-1,0) && step++ < 100)
     matrix = matrix.multiply(this.weights).sumCols().flip()
       .transform(function(i,y,x){
-        return self.activations[self.neurons[y].activation](i,self.neurons[y].threshold)
-      })
+        return this.activations[this.neurons[y].activation](i,this.neurons[y].threshold)
+      }.bind(this))
 
   var outputs = []
   for(var i = this.inputs; i < this.ports; i++)
@@ -36,6 +34,38 @@ Network.prototype.process = function(inputs){
 
   return outputs
 
+}
+
+Network.prototype.clone = function(){
+  var clone = new Network(this.inputs,this.outputs)
+  clone.weights = this.weights.clone()
+  for(var i = 0; i < this.neurons.length; i++)
+    clone.neurons[i] = {threshold: this.neurons[i].threshold,
+      activation: this.neurons[i].activation}
+  return clone
+}
+
+Network.prototype.mutate = function(rate){
+  if(probable(rate/1000)){
+    this.weights.addRowCol()
+    this.neurons.push({threshold: 1, activation: 'rectifier'})
+  }
+  if(probable(rate/1000) && this.weights.length > this.ports){
+    this.weights.removeRowCol()
+    this.neurons.pop()
+  }
+  this.weights.iterate(function(i,y,x){
+    if(probable(rate))
+      this.weights.set(y,x,i + (randomFloat() / ((101 - rate)/10)))
+  }.bind(this))
+}
+
+Network.prototype.crossover = function(a,b){
+  this.weights.iterate(function(i,y,x){
+    var weight = probable(50) ? a.weights.get(y,x) : b.weights.get(y,x)
+    if(weight)
+      this.weights.set(y,x,weight)
+  }.bind(this))
 }
 
 Network.prototype.activations = {

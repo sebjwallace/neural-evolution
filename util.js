@@ -8,5 +8,5 @@ function random(min, max){
 }
 
 function probable(max){
-  return (randomFloat(0,100) < max)
+  return (random(0,10000) / 100 < max)
 }

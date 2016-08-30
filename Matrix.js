@@ -21,6 +21,8 @@ Matrix.prototype = {
   },
 
   get: function(y,x){
+    if(!this.matrix[y])
+      return null
     return this.matrix[y][x]
   },
 
@@ -139,7 +141,7 @@ Matrix.prototype = {
   clone: function(f){
     var clone = new Matrix(this.rows(),this.columns())
     this.iterate(function(i,y,x){
-      var k = f(i,y,x)
+      var k = (f || function(){})(i,y,x)
       clone.set(y,x,k == null ? i : k)
     })
     return clone
