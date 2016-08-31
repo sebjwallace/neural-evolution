@@ -17,11 +17,14 @@ GeneticAlgorithm.prototype.populate = function(constructor){
 GeneticAlgorithm.prototype.train = function(iterations,test){
   for(var i = 0; i < iterations; i++){
     var scores = []
-    for(var n = 0; n < this.size; n++)
+    for(var n = 0; n < this.size; n++){
+      var result = test(this.networks[n])
       scores.push({
-        score: test(this.networks[n]),
+        score: result.score,
+        time: result.time,
         network: this.networks[n]
       })
+    }
     this.repopulate(scores)
   }
 }
@@ -40,7 +43,11 @@ GeneticAlgorithm.prototype.repopulate = function(scores){
 }
 
 GeneticAlgorithm.prototype.select = function(scores){
-  scores.sort(function(a,b){ return a.score - b.score }).reverse()
+  scores.sort(function(a,b){
+    if(a.score == b.score)
+      return b.time - a.time
+    return a.score - b.score
+  }).reverse()
   this.master = scores[0].network
   console.log(scores[0].score)
   var selection = []
