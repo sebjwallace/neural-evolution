@@ -9,7 +9,7 @@ function Network(i,o){
 
   for(var i = 0; i < this.ports; i++)
     this.neurons[i] = {
-      activation: 'sigmoid',
+      activation: 0,
       threshold: 1
     }
 
@@ -48,7 +48,7 @@ Network.prototype.clone = function(){
 Network.prototype.mutate = function(rate){
   if(probable(rate/100)){
     this.weights.addRowCol()
-    this.neurons.push({threshold: 1, activation: 'sigmoid'})
+    this.neurons.push({threshold: 1, activation: 0})
   }
   if(probable(rate/1000) && this.weights.length > this.ports){
     this.weights.removeRowCol()
@@ -60,7 +60,7 @@ Network.prototype.mutate = function(rate){
   }.bind(this))
   for(var i = 0; i < this.neurons.length; i++)
     if(probable(rate))
-      this.neurons[i].activation = probable(50) ? 'sigmoid' : 'binary'
+      this.neurons[i].activation = random(0,this.activations.length-1)
 }
 
 Network.prototype.crossover = function(a,b){
@@ -69,51 +69,48 @@ Network.prototype.crossover = function(a,b){
     if(weight)
       this.weights.set(y,x,weight)
   }.bind(this))
+  for(var i = 0; i < this.neurons.length; i++){
+    // this.neurons[i].activation = probable(50) ? a.neurons[i].activation : b.neurons[i].activation
+    // this.neurons[i].threshold = probable(50) ? a.neurons[i].threshold : b.neurons[i].threshold
+  }
 }
 
-Network.prototype.activations = {
+Network.prototype.activations = [
 
-  identity: function(x){
+  function(x){ // identity
     return x
   },
 
-  binary: function(x,t){
+  function(x,t){ // binary
     return x > (t || 0) ? 1 : 0
   },
 
-  bipolar: function(x,t){
+  function(x,t){ // bipolar
     return x > (t || 0) ? 1 : -1
   },
 
-  rectifier: function(x,t){
+  function(x,t){ // rectifier
     return x > (t || 0) ? x : 0
   },
 
-  gate: function(x,t){
+  function(x,t){ // gate
     return Math.floor(x > (t || 1) ? x : 0)
   },
 
-  sigmoid: function(x){
+  function(x){ // sigmoid
     return 1 / (1 + Math.pow(Math.E,-x))
   },
 
-  tahn: function(x){
+  function(x){ // tahn
     return Math.tan(x)
   },
 
-  sin: function(x){
+  function(x){ // sin
     return Math.sin(x)
   },
 
-  cos: function(x){
+  function(x){ // cos
     return Math.cos(x)
-  },
-
-  gaussian: function(x){
-    var n = 0
-    for(var i = 0; i < x; i++)
-      n += Math.random()
-    return n / x
   }
 
-}
+]

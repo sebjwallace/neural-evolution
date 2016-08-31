@@ -1,13 +1,11 @@
 
-
-
 var ga = new GeneticAlgorithm(100,function(){
   var net = new Network(3,1)
   net.mutate(100)
   return net
 })
 
-ga.train(1000,function(net){
+ga.train(100,function(net){
 
   var score = 0
 
