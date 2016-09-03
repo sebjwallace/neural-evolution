@@ -1,60 +1,70 @@
 
-function GeneticAlgorithm(size,constructor){
+function GeneticAlgorithm(args){
 
-  this.size = size
-  this.networks = []
+  this.size = args.size
+  this.subjects = []
+  this.scores = []
+  this.generation = 0
   this.master = null
 
-  this.populate(constructor)
+  this.genesis = args.genesis
+  this.clone = args.clone
+  this.mutate = args.mutate
+  this.crossover = args.crossover
+  this.test = args.test
+  this.log = args.log
+
+  this.populate()
 
 }
 
-GeneticAlgorithm.prototype.populate = function(constructor){
-  for(var i = 0; i < this.size; i++)
-    this.networks[i] = constructor()
+GeneticAlgorithm.prototype.populate = function(){
+  var i = this.size; while(i--)
+    this.subjects[i] = this.genesis()
 }
 
-GeneticAlgorithm.prototype.train = function(iterations,test){
-  for(var i = 0; i < iterations; i++){
+GeneticAlgorithm.prototype.train = function(generations){
+  var i = generations; while(i--){
     var scores = []
-    for(var n = 0; n < this.size; n++){
-      var result = test(this.networks[n])
+    var n = this.size; while(n--){
       scores.push({
-        score: result.score,
-        time: result.time,
-        network: this.networks[n]
+        score: this.test(this.subjects[n]),
+        subject: this.subjects[n]
       })
     }
+    this.generation = this.size - i
     this.repopulate(scores)
   }
 }
 
 GeneticAlgorithm.prototype.repopulate = function(scores){
-  this.networks = this.select(scores)
-  for(var i = 0; i < this.size / 2; i++){
-    var mother = this.networks[random(0,this.networks.length-1)]
-    var father = this.networks[random(0,this.networks.length-1)]
-    var child = this.networks[random(1,this.networks.length-1)]
-    child.crossover(mother,father)
-    child.mutate(random(10,100))
-    for(var n = 0; n < (probable(0.1) ? random(1,10) : 0); n++)
-      child.mutate(100)
+  this.subjects = this.select(this.sort(scores))
+  var i = this.size/2; while(i--){
+    var mother = this.subjects[random(0,this.subjects.length-1)]
+    var father = this.subjects[random(0,this.subjects.length-1)]
+    var child = this.subjects[random(1,this.subjects.length-1)]
+    if(this.crossover)
+      child = this.crossover(child,mother,father)
+    child = this.mutate(child)
   }
 }
 
+GeneticAlgorithm.prototype.sort = function(scores){
+  scores.sort(function(a,b)
+    {return a.score - b.score}).reverse()
+  this.master = scores[0].subject
+  this.scores.push(scores[0].score)
+  if(this.log)
+    this.log(this.generation,scores[0].score)
+  return scores
+}
+
 GeneticAlgorithm.prototype.select = function(scores){
-  scores.sort(function(a,b){
-    if(a.score == b.score)
-      return b.time - a.time
-    return a.score - b.score
-  }).reverse()
-  this.master = scores[0].network
-  console.log(scores[0].score)
   var selection = []
-  for(var i = 0; i < scores.length; i++)
+  var i = scores.length; while(i--)
     if(probable((100-i)/0.9))
-      selection.push(scores[i].network.clone())
+      selection.push(this.clone(scores[i].subject))
   while(selection.length < this.size)
-    selection.push(selection[random(0,selection.length-1)].clone())
+    selection.push(this.clone(selection[random(0,selection.length-1)]))
   return selection
 }

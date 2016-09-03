@@ -1,4 +1,3 @@
-
 function Network(i,o){
 
   this.inputs = i
@@ -9,7 +8,7 @@ function Network(i,o){
 
   for(var i = 0; i < this.ports; i++)
     this.neurons[i] = {
-      activation: 0,
+      activation: 1,
       threshold: 1
     }
 
@@ -58,12 +57,6 @@ Network.prototype.mutate = function(rate){
     if(probable(rate))
       this.weights.set(y,x,i + randomFloat())
   }.bind(this))
-  for(var i = 0; i < this.neurons.length; i++){
-    if(probable(rate))
-      this.neurons[i].activation = random(0,this.activations.length-1)
-    if(probable(rate))
-      this.neurons[i].threshold += randomFloat()
-  }
 }
 
 Network.prototype.crossover = function(a,b){
